@@ -1,0 +1,24 @@
+# Reference workflow — keyless AWS auth via OIDC.
+name: example-deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write        # without this, no OIDC token is issued at all
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-south-1' }}
+
+      - name: Prove it worked
+        run: aws sts get-caller-identity
